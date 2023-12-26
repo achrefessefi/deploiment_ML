@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect,flash
+from flask import Flask, get_flashed_messages, request, render_template, redirect,flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf.csrf import CSRFProtect
@@ -35,7 +35,6 @@ def homepage():
     login_form = LoginForm()
     registration_form = RegistrationForm()
     return render_template("index.html", login_form=login_form, registration_form=registration_form)
-
 @app.route("/login", methods=["POST"])
 def check_login():
     print("Login Request Data:", request.form)
@@ -43,15 +42,31 @@ def check_login():
     entered_password = request.form['Password']
 
     user = User.query.filter_by(username=UN).first()
-
-    if user and check_password_hash(user.password, entered_password):
-        # Redirect to the 'loggedIn' route if login is successful
-        print("Login successful. Redirecting to '/loggedIn'")
-        return redirect("/loggedIn")
+    test=False
+    if user:
+        # User exists in the database
+        if check_password_hash(user.password, entered_password):
+            # Redirect to the 'loggedIn' route if login is successful
+            print("Login successful. Redirecting to '/loggedIn'")
+            return render_template('loggedIn.html')
+        else:
+            # Password is incorrect
+            print("Incorrect password. Redirecting to '/'")
+            flash("Incorrect password. Please try again.", "error")
+            test=True
+            return render_template('index.html',test=test)
     else:
-        print("Login failed. Redirecting to '/'")
-        return redirect("/")
+        # User does not exist in the database
+        print("User not found. Redirecting to '/'")
+        flash("User not found. Please register if you don't have an account.", "error")
+        # Add this line in the check_login route
+        print("Flash Messages:", get_flashed_messages(with_categories=True))
 
+        return redirect("/")
+    
+from flask import render_template, redirect, request, flash
+
+# ... existing code ...
 
 @app.route('/', methods=['GET', 'POST'])
 def register_page():
@@ -61,11 +76,20 @@ def register_page():
             dPW = generate_password_hash(request.form['DPassword'], method='pbkdf2:sha256')
             Uemail = request.form['EmailUser']
 
-            new_user = User(username=dUN, password=dPW, email=Uemail)
-            db.session.add(new_user)
-            db.session.commit()
+            # Check if the username already exists
+            existing_user = User.query.filter_by(username=dUN).first()
 
-            return redirect("/")
+            if existing_user:
+                # Username already exists, display an error message
+                flash("Username already exists. Please choose a different username.", "error")
+                return render_template("index.html",check_username=True)
+            else:
+                # Username does not exist, register the new user
+                new_user = User(username=dUN, password=dPW, email=Uemail)
+                db.session.add(new_user)
+                db.session.commit()
+
+                return redirect("/")
 
         return render_template("index.html")
     except Exception as e:
@@ -73,6 +97,9 @@ def register_page():
         import traceback
         traceback.print_exc()
         return "Internal Server Error", 500
+
+# ... existing code ...
+
 
 
 if __name__ == "__main__":

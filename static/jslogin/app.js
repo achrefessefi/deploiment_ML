@@ -37,3 +37,32 @@ function moveSlider() {
 bullets.forEach((bullet) => {
   bullet.addEventListener("click", moveSlider);
 });
+
+
+// Assuming you're using Fetch API for making asynchronous requests
+
+document.querySelector('.sign-in-form').addEventListener('submit', async function (event) {
+ 
+
+  const form = event.target;
+  const formData = new FormData(form);
+
+  try {
+      const response = await fetch('/login', {
+          method: 'POST',
+          body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.test) {
+          // Redirect to the logged-in page
+          window.location.href = result.redirect;
+      } else {
+          // Display an error message or handle it as needed
+          console.log("Login failed. Incorrect username or password.");
+      }
+  } catch (error) {
+      console.error("An error occurred:", error);
+  }
+});

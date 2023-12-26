@@ -38,11 +38,12 @@
                                     autocomplete="off"
                                     name="Username"
                                     required
+                                    id="pass"
                                 />
                                 <label>Name</label>
                             </div>
 
-                            <div class="input-wrap">
+                            <div  class="input-wrap">
                                 <input
                                     type="password"
                                     minlength="3"
@@ -50,10 +51,20 @@
                                     name="Password"
                                     autocomplete="off"
                                     required
+                                    id="pass"
                                 />
                                 <label>Password</label>
+                                
                             </div>
-
+                            {% if test %}
+                            <style>
+                                #pass{
+                                    color: red;
+                                    border-bottom: 1px solid red;
+                                }
+                            </style>
+                            <p style="color: red; font-size:small; margin-bottom:30px;">  Passwoard or Username incorrect.Try Again!</p>
+                            {% endif %}
                             <input type="submit" value="Sign In" class="sign-btn" />
 
                             <p class="text">
@@ -82,12 +93,33 @@
                                     minlength="4"
                                     class="input-field"
                                     name="DUsername"
+                                    id="check_username"
                                     autocomplete="off"
                                     required
                                 />
                                 <label>Name</label>
                             </div>
+                            {% if check_username %}
+                            <style>
+                                #check_username{
+                                    color: red;
+                                    border-bottom: 1px solid red;
+                                }
+                            </style>
+                            <script> const toggle_btn = document.querySelectorAll(".toggle"); 
+                            const main = document.querySelector("main");
+                            main.classList.toggle("sign-up-mode");
                             
+toggle_btn.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    main.classList.toggle("sign-up-mode");
+  });
+});
+                            
+                            
+                            </script>
+                            <p style="color: red; font-size:small; margin-bottom:30px;"> Username already exist</p>
+                            {% endif %}
 
                             <div class="input-wrap">
                               <input
@@ -154,16 +186,18 @@
             </div>
         </div>
     </main>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-  
+   
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
     <!-- Javascript file -->
     <script src="/static/jslogin/app.js"></script>
 </body>
